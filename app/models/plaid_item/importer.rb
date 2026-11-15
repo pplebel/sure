@@ -6,8 +6,9 @@ class PlaidItem::Importer
 
   def import
     fetch_and_import_item_data
-    fetch_and_import_accounts_data
+    warnings = fetch_and_import_accounts_data
     plaid_item.good! if plaid_item.requires_update?
+    warnings
   rescue Plaid::ApiError => e
     handle_plaid_error(e)
   end
@@ -18,14 +19,21 @@ class PlaidItem::Importer
     # All errors that should halt the import should be re-raised after handling
     # These errors will propagate up to the Sync record and mark it as failed.
     def handle_plaid_error(error)
-      error_body = JSON.parse(error.response_body)
+      error_body = begin
+        JSON.parse(error.response_body.to_s)
+      rescue JSON::ParserError
+        {}
+      end
+      error_body = {} unless error_body.is_a?(Hash)
 
       case error_body["error_code"]
       when "ITEM_LOGIN_REQUIRED"
-        plaid_item.update!(status: :requires_update)
-      else
-        raise error
+        # Discard unsaved children left cached by the rolled-back account import
+        # before saving only the connection's authentication status.
+        plaid_item.reload.update!(status: :requires_update)
       end
+
+      raise error
     end
 
     def fetch_and_import_item_data
@@ -68,5 +76,7 @@ class PlaidItem::Importer
         # Once we know all data has been imported, save the cursor to avoid re-fetching the same data next time
         plaid_item.update!(next_cursor: snapshot.transactions_cursor)
       end
+
+      snapshot.warnings
     end
 end

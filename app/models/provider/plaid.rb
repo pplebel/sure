@@ -1,3 +1,5 @@
+require "uri"
+
 class Provider::Plaid
   attr_reader :client, :region
 
@@ -42,7 +44,7 @@ class Provider::Plaid
     raise JWT::VerificationError, "Invalid webhook body hash" unless ActiveSupport::SecurityUtils.secure_compare(expected_hash, actual_hash)
   end
 
-  def get_link_token(user_id:, webhooks_url:, redirect_url:, accountable_type: nil, access_token: nil, account_selection_enabled: false)
+  def get_link_token(user_id:, webhooks_url:, redirect_url:, accountable_type: nil, access_token: nil, account_selection_enabled: false, additional_consented_products: [])
     request_params = {
       user: { client_user_id: user_id },
       client_name: "Sure Finances",
@@ -52,8 +54,19 @@ class Provider::Plaid
       redirect_uri: redirect_url
     }
 
+    request_params.delete(:webhook) if omit_local_desktop_callback?(webhooks_url)
+    request_params.delete(:redirect_uri) if omit_local_desktop_callback?(redirect_url)
+
     if access_token.present?
       request_params[:access_token] = access_token
+      # Reauthentication retains existing grants; only an explicit consent repair
+      # requests new products, which must not be required on ordinary reconnect.
+      unless eu? || additional_consented_products.empty?
+        unsupported = additional_consented_products - SUPPORTED_PLAID_PRODUCTS
+        raise ArgumentError, "Unsupported additional Plaid products" if unsupported.any?
+
+        request_params[:additional_consented_products] = additional_consented_products.uniq
+      end
       request_params[:update] = { account_selection_enabled: true } if account_selection_enabled
     else
       request_params[:transactions] = { days_requested: MAX_HISTORY_DAYS }
@@ -152,6 +165,15 @@ class Provider::Plaid
   end
 
   private
+    def omit_local_desktop_callback?(url)
+      return false unless ENV["PLAID_LOCAL_DESKTOP_TEST"] == "1"
+
+      uri = URI.parse(url.to_s)
+      uri.scheme == "http" && %w[localhost 127.0.0.1 ::1].include?(uri.hostname&.downcase)
+    rescue URI::InvalidURIError
+      false
+    end
+
     TransactionSyncResponse = Struct.new :added, :modified, :removed, :cursor, keyword_init: true
     InvestmentsResponse = Struct.new :holdings, :transactions, :securities, keyword_init: true
 

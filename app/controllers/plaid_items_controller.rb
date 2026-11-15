@@ -28,6 +28,7 @@ class PlaidItemsController < ApplicationController
       webhooks_url: webhooks_url,
       redirect_url: accounts_url,
       account_selection_enabled: @plaid_item.us? && params[:add_accounts] == "true",
+      additional_consented_products: Array(params[:consent_products]).map(&:to_s) & Provider::Plaid::SUPPORTED_PLAID_PRODUCTS,
     )
   rescue Plaid::ApiError => e
     handle_link_token_error(e)
