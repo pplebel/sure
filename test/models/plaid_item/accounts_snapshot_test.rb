@@ -313,7 +313,7 @@ class PlaidItem::AccountsSnapshotTest < ActiveSupport::TestCase
     end
   end
 
-  test "still raises unavailable-liabilities errors once liabilities was added to the item" do
+  test "reports unavailable liabilities once billed without aborting the snapshot" do
     @plaid_item.update!(available_products: [], billed_products: [ "liabilities" ])
 
     %w[PRODUCTS_NOT_SUPPORTED ACCESS_NOT_GRANTED NO_LIABILITY_ACCOUNTS].each do |error_code|
@@ -326,7 +326,9 @@ class PlaidItem::AccountsSnapshotTest < ActiveSupport::TestCase
         Plaid::ApiError.new(code: 400, response_body: { "error_code" => error_code }.to_json)
       )
 
-      assert_raises(Plaid::ApiError) { snapshot.get_account_data("123") }
+      assert_nil snapshot.get_account_data("123").liabilities_data
+      assert_equal 1, snapshot.warnings.size
+      assert_equal error_code, snapshot.warnings.first[:error_code]
     end
   end
 

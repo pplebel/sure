@@ -126,3 +126,5 @@ Maybe and Sure are both distributed under
 an [AGPLv3 license](https://github.com/we-promise/sure/blob/main/LICENSE).
 - "Maybe" is a trademark of Maybe Finance, Inc.
 - "Sure" is not, and refers to this community fork.
+> **Personal customization branch:** Reviewed transactions, budget inclusion preferences and guarded Plaid handling are maintained on `codex/personal`. See [personal maintenance and stable-release upgrades](personal/README.md). Docker remains the runtime; these source tools never deploy or reset financial data automatically.
+

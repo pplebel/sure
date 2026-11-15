@@ -100,7 +100,8 @@ class PlaidItemsControllerTest < ActionDispatch::IntegrationTest
     PlaidItem.any_instance.expects(:get_update_link_token).with(
       webhooks_url: webhooks_plaid_url,
       redirect_url: accounts_url,
-      account_selection_enabled: true
+      account_selection_enabled: true,
+      additional_consented_products: []
     ).returns("link-token")
 
     get edit_plaid_item_url(plaid_item, add_accounts: true)
@@ -114,7 +115,8 @@ class PlaidItemsControllerTest < ActionDispatch::IntegrationTest
     PlaidItem.any_instance.expects(:get_update_link_token).with(
       webhooks_url: webhooks_plaid_eu_url,
       redirect_url: accounts_url,
-      account_selection_enabled: false
+      account_selection_enabled: false,
+      additional_consented_products: []
     ).returns("link-token")
 
     get edit_plaid_item_url(plaid_item, add_accounts: true)

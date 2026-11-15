@@ -69,7 +69,8 @@ class PlaidItem::ImporterTest < ActiveSupport::TestCase
     @importer.stubs(:fetch_and_import_item_data).raises(error)
     @importer.expects(:fetch_and_import_accounts_data).never
 
-    @importer.import
+    raised = assert_raises(Plaid::ApiError) { @importer.import }
+    assert_same error, raised
 
     assert_predicate @plaid_item.reload, :requires_update?
   end

@@ -1,0 +1,26 @@
+name: Personal fork regression
+
+on:
+  push:
+    branches: [codex/personal]
+  pull_request:
+    branches: [codex/personal]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out source and stable tags
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch and verify the pinned official stable tag
+        run: python3 personal/fetch_base.py
+      - name: Verify source and run isolated custom and full Rails suites
+        run: python3 personal/verify.py --full

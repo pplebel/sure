@@ -91,7 +91,8 @@ class PlaidItemTest < ActiveSupport::TestCase
       redirect_url: "https://example.com/accounts",
       region: @plaid_item.plaid_region,
       access_token: @plaid_item.access_token,
-      account_selection_enabled: true
+      account_selection_enabled: true,
+      additional_consented_products: []
     ).returns("link-token")
 
     result = @plaid_item.get_update_link_token(

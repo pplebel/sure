@@ -941,6 +941,8 @@ end
       transfer_outflow_money: Money.new(0, "USD")
     )
 
+    review_search = Transaction::Search.new(family, filters: { review_status: "unreviewed" }, accessible_account_ids: [ account.id ])
+    Transaction::Search.expects(:new).with(family, filters: { review_status: "unreviewed" }, accessible_account_ids: [ account.id ]).returns(review_search)
     Transaction::Search.expects(:new).with(family, filters: {}, accessible_account_ids: [ account.id ]).returns(search)
     search.expects(:totals).once.returns(totals)
 
@@ -965,6 +967,8 @@ end
       transfer_outflow_money: Money.new(0, "USD")
     )
 
+    review_search = Transaction::Search.new(family, filters: { review_status: "unreviewed" }, accessible_account_ids: [ account.id ])
+    Transaction::Search.expects(:new).with(family, filters: { review_status: "unreviewed" }, accessible_account_ids: [ account.id ]).returns(review_search)
     Transaction::Search.expects(:new).with(family, filters: { "categories" => [ "Food" ], "types" => [ "expense" ] }, accessible_account_ids: [ account.id ]).returns(search)
     search.expects(:totals).once.returns(totals)
 
@@ -988,6 +992,8 @@ end
       transfer_outflow_money: Money.new(3000, "USD")
     )
 
+    review_search = Transaction::Search.new(family, filters: { review_status: "unreviewed" }, accessible_account_ids: [ account.id ])
+    Transaction::Search.expects(:new).with(family, filters: { review_status: "unreviewed" }, accessible_account_ids: [ account.id ]).returns(review_search)
     Transaction::Search.expects(:new).with(family, filters: { "types" => [ "transfer" ] }, accessible_account_ids: [ account.id ]).returns(search)
     search.expects(:totals).once.returns(totals)
 
