@@ -1,10 +1,11 @@
 class IncomeStatement::FamilyStats
   include IncomeStatement::ScopedTransactionsQuery
 
-  def initialize(family, interval: "month", account_ids: nil)
+  def initialize(family, interval: "month", account_ids: nil, budget_only: false)
     @family = family
     @interval = interval
     @account_ids = account_ids
+    @budget_only = budget_only
   end
 
   def call
@@ -46,6 +47,7 @@ class IncomeStatement::FamilyStats
           #{exchange_rates_join_sql}
           WHERE a.family_id = :family_id
             AND t.kind NOT IN (#{budget_excluded_kinds_sql})
+            #{@budget_only ? "AND #{Transaction.budget_inclusion_sql("t")}" : ""}
             AND ae.excluded = false
             AND a.exclude_from_reports = false
             #{pending_providers_sql}

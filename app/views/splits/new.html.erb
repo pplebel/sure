@@ -40,6 +40,7 @@
                    categories: @categories,
                    merchants: @merchants,
                    tags: @tags,
+                   budget_inclusion: @entry.transaction.budget_inclusion,
                    removable: false %>
       </div>
 
@@ -48,7 +49,8 @@
                    index: "ROW_IDX_PLACEHOLDER",
                    categories: @categories,
                    merchants: @merchants,
-                   tags: @tags %>
+                   tags: @tags,
+                   budget_inclusion: @entry.transaction.budget_inclusion %>
       </template>
 
       <%# Add split button %>

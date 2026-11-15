@@ -9,7 +9,7 @@ class Entry < ApplicationRecord
   # an account sync. Reports and budgets pick such edits up through
   # Family#entries_cache_version, which the save itself bumps.
   DESCRIPTIVE_ATTRIBUTES = %w[name notes updated_at].freeze
-  DESCRIPTIVE_TRANSACTION_ATTRIBUTES = %w[category_id merchant_id updated_at].freeze
+  DESCRIPTIVE_TRANSACTION_ATTRIBUTES = %w[category_id merchant_id budget_included updated_at].freeze
 
   attr_accessor :unsplitting
 
@@ -568,7 +568,8 @@ class Entry < ApplicationRecord
           category_id: split_attrs[:category_id],
           merchant_id: split_attrs[:merchant_id].presence || entryable.try(:merchant_id),
           tag_ids: split_attrs[:tag_ids] || [],
-          kind: entryable.try(:kind)
+          kind: entryable.try(:kind),
+          budget_inclusion: split_attrs.fetch(:budget_inclusion) { entryable.try(:budget_inclusion) }
         )
         if lock_attributes
           locked_at = Time.current

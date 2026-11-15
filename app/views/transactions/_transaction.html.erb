@@ -92,6 +92,11 @@
                       </span>
                     <% end %>
 
+                    <% unless transaction.included_in_budget? || Transaction::BUDGET_EXCLUDED_KINDS.include?(transaction.kind) %>
+                      <%= render DS::Pill.new(label: "Outside budget", tone: :neutral, marker: false,
+                            title: "Tracked in balances, history and reports; excluded from budget totals") %>
+                    <% end %>
+
                     <%# Pending indicator %>
                     <% if transaction.pending? %>
                       <%= render DS::Pill.new(

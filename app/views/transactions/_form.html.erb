@@ -122,6 +122,10 @@
               include_blank: t(".none"),
               label: t(".merchant_label")
             ) %>
+        <%= ef.select :budget_inclusion,
+              [["Use category default", "category"], ["Include in budget", "include"], ["Exclude from budget", "exclude"]],
+              { label: "Budget treatment" } %>
+        <p class="text-xs text-secondary">Budget only. Balances, history and reports stay intact.</p>
         <%= render DS::TagSelect.new(
               form: ef,
               tags: tags,

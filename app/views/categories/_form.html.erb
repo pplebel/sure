@@ -67,6 +67,14 @@
       </div>
     </section>
 
+    <section class="space-y-2">
+      <div class="flex items-center justify-between gap-3">
+        <%= f.label :budget_default_included, "Include in budget by default", class: "text-sm text-primary" %>
+        <%= f.toggle :budget_default_included %>
+      </div>
+      <p class="text-xs text-secondary">Applies to existing and future transactions using this category default. Individual overrides stay unchanged. Subcategories keep their own default. Transactions remain in balances, history and reports.</p>
+    </section>
+
     <section>
       <%= hidden_field_tag :transaction_id, params[:transaction_id] %>
       <%= f.submit %>

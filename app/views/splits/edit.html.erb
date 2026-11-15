@@ -43,6 +43,7 @@
                      category_id: child.entryable.try(:category_id),
                      merchant_id: child.entryable.try(:merchant_id),
                      tag_ids: child.entryable.try(:tag_ids) || [],
+                     budget_inclusion: child.entryable.budget_inclusion,
                      categories: @categories,
                      merchants: @merchants,
                      tags: @tags %>
@@ -54,7 +55,8 @@
                    index: "ROW_IDX_PLACEHOLDER",
                    categories: @categories,
                    merchants: @merchants,
-                   tags: @tags %>
+                   tags: @tags,
+                   budget_inclusion: @entry.transaction.budget_inclusion %>
       </template>
 
       <%# Add split button %>

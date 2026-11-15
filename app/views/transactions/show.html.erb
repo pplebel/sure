@@ -111,6 +111,13 @@
               <p class="text-xs text-secondary"><%= outflow_category ? t(".category_set_on_outflow") : t(".category_set_on_hidden_outflow") %></p>
             </div>
           <% end %>
+          <%= f.fields_for :entryable do |ef| %>
+            <%= ef.select :budget_inclusion,
+                  [["Use category default", "category"], ["Include in budget", "include"], ["Exclude from budget", "exclude"]],
+                  { label: "Budget treatment" },
+                  { disabled: edit_locked || @entry.split_parent?, data: { "auto-submit-form-target": "auto" } } %>
+            <p class="text-xs text-secondary"><%= @entry.split_parent? ? "Set budget treatment on each split line." : "Category default: #{ef.object.category&.budget_default_included == false ? 'excluded' : 'included'}. This setting changes budget totals only; balances, history and reports stay intact. Transfers and credit-card payments keep their existing treatment." %></p>
+          <% end %>
         <% end %>
       </div>
     <% end %>

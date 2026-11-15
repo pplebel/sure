@@ -1,4 +1,4 @@
-<%# locals: (index:, categories:, merchants:, tags:, name: nil, amount: nil, category_id: nil, merchant_id: nil, tag_ids: [], removable: true) %>
+<%# locals: (index:, categories:, merchants:, tags:, name: nil, amount: nil, category_id: nil, merchant_id: nil, tag_ids: [], budget_inclusion: "category", removable: true) %>
 
 <%# Styled builder fields and DS pickers, the same controls as the transaction form. %>
 <div class="p-3 rounded-lg border border-secondary bg-container space-y-2" data-split-transaction-target="row">
@@ -67,5 +67,9 @@
             ) %>
       </div>
     </div>
+    <%= row.select :budget_inclusion,
+          [["Use category default", "category"], ["Include in budget", "include"], ["Exclude from budget", "exclude"]],
+          { selected: budget_inclusion, label: "Budget treatment" } %>
+    <p class="text-xs text-secondary">Budget only. This split remains in transaction history, reports and the account balance.</p>
   <% end %>
 </div>

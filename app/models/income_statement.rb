@@ -11,10 +11,11 @@ class IncomeStatement
   # budget's "owned accounts only" view) instead of inferring it from
   # `user.finance_accounts`. `user` is still kept for cache-key/estimate
   # purposes when both are given.
-  def initialize(family, user: nil, accounts: nil)
+  def initialize(family, user: nil, accounts: nil, budget_only: false)
     @family = family
     @user = user || Current.user
     @accounts = accounts
+    @budget_only = budget_only
   end
 
   def totals(transactions_scope: nil, date_range:)
@@ -257,7 +258,7 @@ class IncomeStatement
       @totals_for_period ||= {}
       @totals_for_period[period_cache_key(period)] ||=
         totals_query(
-          transactions_scope: family.transactions.visible.excluding_pending.in_period(period),
+          transactions_scope: budget_scope(family.transactions.visible.excluding_pending.in_period(period)),
           date_range: period.date_range
         )
     end
@@ -270,7 +271,7 @@ class IncomeStatement
       ]) do
         DailyExpenseTotals.new(
           family,
-          transactions_scope: family.transactions.visible.excluding_pending.in_period(period),
+          transactions_scope: budget_scope(family.transactions.visible.excluding_pending.in_period(period)),
           date_range: period.date_range,
           included_account_ids: included_account_ids
         ).call
@@ -290,7 +291,7 @@ class IncomeStatement
       ]) do
         DailyExpenseTotals.new(
           family,
-          transactions_scope: family.transactions.visible.excluding_pending.in_period(period),
+          transactions_scope: budget_scope(family.transactions.visible.excluding_pending.in_period(period)),
           date_range: period.date_range,
           included_account_ids: included_account_ids,
           by_category: true
@@ -316,14 +317,14 @@ class IncomeStatement
       @family_stats ||= {}
       @family_stats[interval] ||= Rails.cache.fetch([
         "income_statement", "family_stats", family.id, user&.id, interval, included_account_ids_hash, *cache_freshness_key
-      ]) { FamilyStats.new(family, interval:, account_ids: included_account_ids).call }
+      ]) { FamilyStats.new(family, interval:, account_ids: included_account_ids, budget_only: @budget_only).call }
     end
 
     def category_stats(interval: "month")
       @category_stats ||= {}
       @category_stats[interval] ||= Rails.cache.fetch([
         "income_statement", "category_stats", family.id, user&.id, interval, included_account_ids_hash, *cache_freshness_key
-      ]) { CategoryStats.new(family, interval:, account_ids: included_account_ids).call }
+      ]) { CategoryStats.new(family, interval:, account_ids: included_account_ids, budget_only: @budget_only).call }
     end
 
     def included_account_ids
@@ -348,11 +349,17 @@ class IncomeStatement
         family.accounts_status_version,
         family.currency,
         ExchangeRate.maximum(:updated_at)&.to_i,
-        family.investment_contributions_as_spending?
+        family.investment_contributions_as_spending?,
+        @budget_only
       ]
     end
 
+    def budget_scope(scope)
+      @budget_only ? scope.included_in_budget : scope
+    end
+
     def totals_query(transactions_scope:, date_range:)
+      transactions_scope = budget_scope(transactions_scope)
       sql_hash = Digest::MD5.hexdigest(transactions_scope.to_sql)
 
       Rails.cache.fetch([

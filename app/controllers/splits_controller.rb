@@ -92,7 +92,7 @@ class SplitsController < ApplicationController
     end
 
     def split_params
-      params.require(:split).permit(splits: [ :name, :amount, :category_id, :merchant_id, :excluded, tag_ids: [] ])
+      params.require(:split).permit(splits: [ :name, :amount, :category_id, :merchant_id, :excluded, :budget_inclusion, tag_ids: [] ])
     end
 
     def set_form_options
@@ -115,6 +115,7 @@ class SplitsController < ApplicationController
           name: s[:name],
           amount: s[:amount].to_d * -1,
           excluded: s[:excluded],
+          budget_inclusion: s[:budget_inclusion].presence || @entry.transaction.budget_inclusion,
           **references.scope(category_id: s[:category_id], merchant_id: s[:merchant_id], tag_ids: s[:tag_ids])
         }
       end

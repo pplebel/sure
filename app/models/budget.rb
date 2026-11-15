@@ -167,7 +167,7 @@ class Budget < ApplicationRecord
   # the pre-personal-budgets behavior: whatever the requesting viewer can
   # see, since it has no single owner to scope by.
   def transactions
-    scope = family.transactions.visible.in_period(period)
+    scope = family.transactions.visible.included_in_budget.excluding_pending.where(entries: { excluded: false }).in_period(period)
 
     if user_id.present?
       scope = scope.joins(:entry).where(entries: { account_id: family.accounts.where(owner_id: user_id).included_in_reports.select(:id) })
@@ -523,7 +523,7 @@ class Budget < ApplicationRecord
       0.to_d
     end
     def income_statement
-      @income_statement ||= family.income_statement(user: current_user, accounts: income_statement_accounts)
+      @income_statement ||= IncomeStatement.new(family, user: current_user, accounts: income_statement_accounts, budget_only: true)
     end
 
     # nil for the household budget (IncomeStatement falls back to whatever
