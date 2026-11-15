@@ -234,6 +234,7 @@
           <% end %>
 
           <div class="shrink-0 ml-auto flex items-center justify-end gap-2 <%= "opacity-50" if entry.excluded %>">
+            <%= render "transactions/review_control", entry: entry %>
             <%# Protection indicator - shows on hover when entry is protected from sync %>
             <% if entry.protected_from_sync? && !entry.excluded? %>
               <%= link_to entry_path(entry),

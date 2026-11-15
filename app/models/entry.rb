@@ -8,7 +8,7 @@ class Entry < ApplicationRecord
   # transfer matching never read them, so an edit limited to them doesn't need
   # an account sync. Reports and budgets pick such edits up through
   # Family#entries_cache_version, which the save itself bumps.
-  DESCRIPTIVE_ATTRIBUTES = %w[name notes updated_at].freeze
+  DESCRIPTIVE_ATTRIBUTES = %w[name notes reviewed_at updated_at].freeze
   DESCRIPTIVE_TRANSACTION_ATTRIBUTES = %w[category_id merchant_id budget_included updated_at].freeze
 
   attr_accessor :unsplitting
@@ -376,6 +376,10 @@ class Entry < ApplicationRecord
 
   def balance_trend(entries, balances)
     Balance::TrendCalculator.new(self, entries, balances).trend
+  end
+
+  def reviewed?
+    reviewed_at.present?
   end
 
   def linked?

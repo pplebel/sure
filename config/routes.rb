@@ -559,6 +559,7 @@ Rails.application.routes.draw do
   end
 
   namespace :transactions do
+    resource :review, only: :create, controller: :reviews
     resource :bulk_deletion, only: :create
     resource :bulk_update, only: %i[new create]
     resource :categorize, only: %i[show create] do

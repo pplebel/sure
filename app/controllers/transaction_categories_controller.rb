@@ -26,6 +26,7 @@ class TransactionCategoriesController < ApplicationController
     transaction.lock_saved_attributes!
     @entry.lock_saved_attributes!
 
+    @entry.reload
     in_split_group = helpers.in_split_group?(@entry, params[:grouped])
     respond_to do |format|
       format.html { redirect_back_or_to transaction_path(@entry) }
@@ -46,6 +47,9 @@ class TransactionCategoriesController < ApplicationController
             partial: "categories/category_name_mobile",
             locals: { transaction: transaction }
           ),
+          turbo_stream.replace(dom_id(@entry, :review), partial: "transactions/review_control", locals: {entry: @entry}),
+          turbo_stream.replace(dom_id(@entry, :drawer_review), partial: "transactions/review_control", locals: {entry: @entry, drawer: true}),
+          turbo_stream.replace("review-summary", partial: "transactions/review_summary"),
           *flash_notification_stream_items
         ]
       end

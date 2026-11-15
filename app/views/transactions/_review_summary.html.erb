@@ -1,0 +1,4 @@
+<div id="review-summary" class="flex items-center gap-3 text-sm text-secondary">
+  <%= link_to "Needs review (#{review_needed_count})", transactions_path(q: {review_status: "unreviewed"}, clear_filters: true), class: "text-primary hover:underline", data: { turbo_frame: "_top" } %>
+  <span>Personal review; separate from bank status.</span>
+</div>

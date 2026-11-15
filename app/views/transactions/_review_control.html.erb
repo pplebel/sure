@@ -1,0 +1,20 @@
+<%# locals: (entry:, drawer: false) %>
+<% parent = @split_parent_entry_ids ? @split_parent_entry_ids.include?(entry.id) : entry.split_parent? %>
+<% allowed = !Current.user.guest? && entry.account.permission_for(Current.user).in?([:owner, :full_control]) && !parent %>
+<%= tag.div id: dom_id(entry, drawer ? :drawer_review : :review), class: "shrink-0" do %>
+  <%= form_with url: transactions_review_path, scope: :review, data: { turbo_frame: "_top" }, class: "inline-flex" do |f| %>
+    <%= hidden_field_tag "review[entry_ids][]", entry.id %>
+    <%= f.hidden_field :reviewed, value: entry.reviewed? ? "0" : "1" %>
+    <button type="submit" role="checkbox" aria-checked="<%= entry.reviewed? %>"
+            aria-label="Reviewed: <%= entry.name %>" <%= "disabled" unless allowed %>
+            title="<%= entry.reviewed? ? "Reviewed #{l(entry.reviewed_at, format: :long)}. Click to mark as needing review." : "Mark reviewed after checking the category, amount, date and account." %>"
+            class="flex items-center gap-1 p-1 rounded-md text-sm <%= entry.reviewed? ? "text-primary" : "text-secondary" %>">
+      <%= icon(entry.reviewed? ? "square-check" : "square", size: "sm") %>
+      <% if drawer %><span>Reviewed</span><% end %>
+    </button>
+  <% end %>
+  <% if drawer %>
+    <p class="text-xs text-secondary mt-1">Your personal check of category, amount, date and account. Separate from bank confirmation and statement reconciliation. Changes to these details require another review.</p>
+    <% if parent %><p class="text-xs text-secondary">Review each split separately.</p><% end %>
+  <% end %>
+<% end %>

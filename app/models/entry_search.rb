@@ -2,6 +2,7 @@ class EntrySearch
   include ActiveModel::Model
   include ActiveModel::Attributes
 
+  attribute :review_status, :string
   attribute :search, :string
   attribute :amount, :string
   attribute :amount_operator, :string
@@ -71,6 +72,14 @@ class EntrySearch
       query
     end
 
+    def apply_review_filter(scope, status)
+      case status
+      when "unreviewed" then scope.where(entries: { entryable_type: "Transaction", reviewed_at: nil })
+      when "reviewed" then scope.where(entries: { entryable_type: "Transaction" }).where.not(entries: { reviewed_at: nil })
+      else scope
+      end
+    end
+
     def apply_status_filter(scope, statuses)
       return scope unless statuses.present?
       return scope if statuses.uniq.sort == %w[confirmed pending] # Both selected = no filter
@@ -113,6 +122,7 @@ class EntrySearch
     query = self.class.apply_amount_filter(query, amount, amount_operator)
     query = self.class.apply_accounts_filter(query, accounts, account_ids)
     query = self.class.apply_status_filter(query, status)
+    query = self.class.apply_review_filter(query, review_status)
 
     if transaction_specific_filters?
       # Only Transaction entries have a category/merchant/type/tags, so this

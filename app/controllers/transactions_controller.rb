@@ -240,6 +240,8 @@ class TransactionsController < ApplicationController
               partial: "entries/entry",
               locals: { entry: @entry, in_split_group: in_split_group }
             ),
+            turbo_stream.replace("review-summary", partial: "transactions/review_summary"),
+            turbo_stream.replace(dom_id(@entry, :drawer_review), partial: "transactions/review_control", locals: {entry: @entry, drawer: true}),
             *flash_notification_stream_items
           ].compact
         end
@@ -797,13 +799,15 @@ class TransactionsController < ApplicationController
       cleaned_params = params.fetch(:q, {})
               .permit(
                 :start_date, :end_date, :search, :amount,
-                :amount_operator, :active_accounts_only,
+                :amount_operator, :active_accounts_only, :review_status,
                 accounts: [], account_ids: [],
                 categories: [], merchants: [], types: [], tags: [], status: [], ai_status: [],
                 attachment_status: []
               )
               .to_h
               .compact_blank
+
+      cleaned_params.delete(:review_status) unless %w[reviewed unreviewed].include?(cleaned_params[:review_status])
 
       cleaned_params.delete(:amount_operator) unless cleaned_params[:amount].present?
 

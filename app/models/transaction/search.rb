@@ -148,6 +148,7 @@ class Transaction::Search
 
   ATTACHMENT_STATUSES = %w[with without].freeze
 
+  attribute :review_status, :string
   attribute :search, :string
   attribute :amount, :string
   attribute :amount_operator, :string
@@ -186,6 +187,7 @@ class Transaction::Search
       query = self.class.apply_category_filter(query, categories, family)
       query = self.class.apply_type_filter(query, types)
       query = apply_status_filter(query, status)
+      query = EntrySearch.apply_review_filter(query, review_status)
       query = self.class.apply_merchant_filter(query, merchants)
       query = self.class.apply_tag_filter(query, tags)
       query = apply_ai_status_filter(query, ai_status)

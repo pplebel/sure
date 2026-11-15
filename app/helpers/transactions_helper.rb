@@ -1,4 +1,10 @@
 module TransactionsHelper
+  def review_needed_count
+    Transaction::Search.new(Current.family,
+      filters: { review_status: "unreviewed" },
+      accessible_account_ids: Current.user.accessible_accounts.pluck(:id)).transactions_scope.count
+  end
+
   # @param exclude [Array<String>] filter keys to leave out (e.g. the account
   #   tab doesn't apply to the account activity feed, which is already scoped
   #   to one account)
@@ -9,6 +15,7 @@ module TransactionsHelper
       { key: "account_filter", label: t("transactions.search.filters.account"), icon: "layers" },
       { key: "date_filter", label: t("transactions.search.filters.date"), icon: "calendar" },
       { key: "type_filter", label: t("transactions.search.filters.type"), icon: "tag" },
+      { key: "review_filter", label: "Review", icon: "square-check" },
       { key: "status_filter", label: t("transactions.search.filters.status"), icon: "clock" },
       { key: "amount_filter", label: t("transactions.search.filters.amount"), icon: "hash" },
       { key: "category_filter", label: t("transactions.search.filters.category"), icon: "shapes" },
